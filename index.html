@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GAMEZONE — Streaming & Gaming Portal</title>
+
+  <!-- 1. Tailwind CSS via CDN (Zero-Config) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 2. Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- 3. Google Fonts: Syne (Display), Plus Jakarta Sans (Body), JetBrains Mono (Tabular Numerals) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+
+  <!-- 4. Konfigurasi Tema Tailwind -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Syne', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              DEFAULT: '#84cc16',
+              hover: '#65a30d',
+              dark: '#0b0b0e',
+              surface: '#12141a',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- 5. Custom CSS Styles -->
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .font-display {
+      font-family: 'Syne', sans-serif;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0b0e;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #84cc16;
+    }
+  </style>
+</head>
+<body class="bg-[#0b0b0e] text-slate-100 antialiased selection:bg-[#84cc16] selection:text-black min-h-screen flex flex-col">
+
+  <!-- ========================================================= -->
+  <!-- BAGIAN 1: TOP NAVIGATION BAR                              -->
+  <!-- ========================================================= -->
+  <header id="top-navbar" class="sticky top-0 z-40 h-16 border-b border-white/10 bg-[#0b0b0e]/95 backdrop-blur-md px-4 lg:px-8 flex items-center justify-between transition-colors">
+    <!-- Zona Kiri: Logo Brand & Tombol Menu Mobile -->
+    <div class="flex items-center gap-3">
+      <button id="mobile-menu-btn" onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-lg hover:bg-white/5 text-slate-300" aria-label="Toggle Menu">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+      <a href="#home" onclick="switchCategory('Home'); return false;" class="font-display text-xl font-extrabold tracking-tight whitespace-nowrap">
+        <span>GAME</span><span class="text-[#84cc16]">ZONE</span>
+      </a>
+    </div>
+
+    <!-- Zona Tengah: Navigasi Cepat -->
+    <nav class="hidden md:flex items-center gap-6 text-xs font-semibold tracking-wider uppercase">
+      <button onclick="switchCategory('Home')" data-top-nav="Home" class="top-nav-link text-[#84cc16] border-b-2 border-[#84cc16] py-5 transition-colors whitespace-nowrap">Home</button>
+      <button onclick="switchCategory('Discovery')" data-top-nav="Discovery" class="top-nav-link text-slate-400 hover:text-white py-5 transition-colors whitespace-nowrap">News</button>
+      <button onclick="switchCategory('Media')" data-top-nav="Media" class="top-nav-link text-slate-400 hover:text-white py-5 transition-colors whitespace-nowrap">Games</button>
+      <button onclick="switchCategory('Watch List')" data-top-nav="Watch List" class="top-nav-link text-slate-400 hover:text-white py-5 transition-colors whitespace-nowrap">Reviews</button>
+      <button onclick="switchCategory('Parties')" data-top-nav="Parties" class="top-nav-link text-slate-400 hover:text-white py-5 transition-colors whitespace-nowrap">Esports</button>
+    </nav>
+
+    <!-- Zona Kanan: Live Search, Toggle Tema Night/Light, Notifikasi & Login -->
+    <div class="flex items-center gap-3">
+      <!-- Input Live Search Filter -->
+      <div class="relative flex items-center">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none"></i>
+        <input
+          id="live-search-input"
+          type="text"
+          placeholder="Cari film atau game..."
+          oninput="handleLiveSearch(this.value)"
+          class="w-36 sm:w-52 pl-9 pr-3 py-1.5 text-xs rounded-lg bg-white/5 border border-white/10 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-[#84cc16] transition-colors"
+        />
+      </div>
+
+      <!-- Tombol Night / Light Mode Toggle -->
+      <button
+        id="theme-toggle-btn"
+        onclick="toggleThemeMode()"
+        class="px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:border-[#84cc16]/50 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap transition-colors"
+        title="Ubah Tema Night / Light"
+      >
+        <i id="theme-icon" data-lucide="moon" class="w-3.5 h-3.5 text-[#84cc16]"></i>
+        <span id="theme-label">Night</span>
+      </button>
+
+      <!-- Tombol Notifikasi -->
+      <button
+        onclick="handleNotificationClick()"
+        class="relative p-2 rounded-lg border border-white/10 bg-white/5 hover:border-[#84cc16]/50 transition-colors"
+        aria-label="Notifikasi"
+      >
+        <i data-lucide="bell" class="w-4 h-4 text-slate-300"></i>
+        <span id="notif-badge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#84cc16] text-black font-mono text-[10px] font-bold flex items-center justify-center tabular-nums">3</span>
+      </button>
+
+      <!-- Tombol Login -->
+      <button
+        onclick="showToast('Sesi Akun VIP Aktif — Sinkronisasi Watch List Siap!')"
+        class="hidden sm:inline-flex px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider border border-[#84cc16] hover:bg-[#84cc16] hover:text-black rounded transition-colors whitespace-nowrap"
+      >
+        Login
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- BAGIAN 2: LAYOUT UTAMA 3 KOLOM                            -->
+  <!-- (Sidebar Kiri + Konten Utama Tengah + Sidebar Kanan)      -->
+  <!-- ========================================================= -->
+  <div class="flex-1 flex relative max-w-[1600px] w-full mx-auto">
+
+    <!-- 2A. SIDEBAR KIRI (8 Menu Dinamis State Management) -->
+    <aside id="left-sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-60 border-r border-white/10 bg-[#0b0b0e] lg:bg-transparent p-4 flex flex-col justify-between transform -translate-x-full lg:translate-x-0 transition-transform duration-200">
+      <div class="space-y-6 mt-14 lg:mt-0">
+        <div>
+          <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-2">Menu Navigasi</p>
+          <nav id="sidebar-nav" class="space-y-1">
+            <!-- Di-render secara dinamis oleh fungsi renderSidebarNav() -->
+          </nav>
+        </div>
+
+        <!-- Pengaturan Mode Redirect Iklan Direct Link -->
+        <div class="p-3 rounded-lg border border-white/10 bg-white/[0.02] space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-300">Direct Link Iklan</span>
+            <input id="direct-link-toggle" type="checkbox" checked onchange="toggleDirectAdSetting(this.checked)" class="accent-[#84cc16] w-4 h-4 cursor-pointer" />
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Saat aktif, klik tombol Watch/Play/Poster akan membuka modal video sekaligus membuka tab baru ke DIRECT_LINK.
+          </p>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-white/10 text-xs text-slate-500 flex items-center justify-between">
+        <span>Kualitas Server</span>
+        <span class="font-mono text-[#84cc16] tabular-nums">4K · 60fps</span>
+      </div>
+    </aside>
+
+    <!-- 2B. AREA KONTEN UTAMA (MAIN CONTENT) -->
+    <main class="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-6 space-y-10">
+
+      <!-- Informasi Halaman Aktif (Berubah Dinamis Sesuai Menu Sidebar) -->
+      <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/10">
+        <div>
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <span>GAMEZONE</span>
+            <span>/</span>
+            <span id="active-category-breadcrumb" class="text-[#84cc16] font-semibold">Home</span>
+          </div>
+          <h1 id="active-category-title" class="text-xl sm:text-2xl font-display font-bold tracking-tight mt-0.5">
+            Sorotan Utama & Streaming Trailer
+          </h1>
+        </div>
+        <button
+          onclick="openAdDirectLink('Tombol Stream Server Utama')"
+          class="px-4 py-2 rounded bg-[#84cc16] hover:bg-[#65a30d] text-black text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap flex items-center gap-1.5"
+        >
+          <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+          <span>Direct Stream Server</span>
+        </button>
+      </div>
+
+      <!-- HERO BANNER CAROUSEL (Elden Ring: Shadow of the Erdtree) -->
+      <section id="hero-section" class="relative rounded-xl overflow-hidden border border-white/10 bg-[#12141a]">
+        <div class="relative h-[360px] sm:h-[420px] w-full overflow-hidden">
+          <img
+            id="hero-image"
+            src=""
+            alt="Hero Feature Banner"
+            referrerpolicy="no-referrer"
+            class="w-full h-full object-cover object-center transition-opacity duration-300"
+          />
+          <!-- Gradient Scrim untuk Keterbacaan Teks -->
+          <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-[#0b0b0e] via-transparent to-black/30"></div>
+
+          <!-- Tombol Navigasi Slide Kiri & Kanan -->
+          <button onclick="cycleHero(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded bg-black/60 hover:bg-[#84cc16] hover:text-black text-white border border-white/15 flex items-center justify-center transition-colors" aria-label="Slide Sebelumnya">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+          </button>
+          <button onclick="cycleHero(1)" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded bg-black/60 hover:bg-[#84cc16] hover:text-black text-white border border-white/15 flex items-center justify-center transition-colors" aria-label="Slide Berikutnya">
+            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+          </button>
+
+          <!-- Konten Teks Hero -->
+          <div class="absolute inset-0 z-10 flex flex-col justify-center px-12 sm:px-16 max-w-2xl space-y-4">
+            <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#84cc16]">
+              <span id="hero-kicker">ELDEN RING</span>
+              <span>·</span>
+              <span id="hero-meta" class="text-slate-300 font-mono tabular-nums">4K HDR · 9.8 SCORE</span>
+            </div>
+            <h2 id="hero-title" class="font-display text-3xl sm:text-5xl font-extrabold uppercase tracking-tight text-white leading-none">
+              SHADOW OF THE ERDTREE
+            </h2>
+            <p id="hero-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-lg">
+              The adventure continues in the Lands Between. Explore new realms, face deadly foes, and uncover the mysteries of the Erdtree.
+            </p>
+            <div class="pt-2 flex flex-wrap items-center gap-4">
+              <button
+                onclick="handleWatchAction(currentHeroIndex, 'watch')"
+                class="px-5 py-2.5 rounded bg-[#84cc16] hover:bg-[#65a30d] text-black font-bold text-xs uppercase tracking-wider transition-colors whitespace-nowrap"
+              >
+                Watch Now
+              </button>
+              <button
+                onclick="handleWatchAction(currentHeroIndex, 'trailer')"
+                class="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-wider text-white hover:text-[#84cc16] transition-colors whitespace-nowrap group"
+              >
+                <span class="w-9 h-9 rounded-full border border-white/30 group-hover:border-[#84cc16] flex items-center justify-center bg-black/40">
+                  <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                </span>
+                <span>Watch Trailer</span>
+              </button>
+              <button
+                onclick="addToWatchlistFromHero()"
+                class="px-3.5 py-2 rounded border border-white/20 hover:border-[#84cc16] text-xs font-medium text-slate-200 hover:text-[#84cc16] transition-colors flex items-center gap-1.5 whitespace-nowrap"
+              >
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Add to List</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Indikator Titik Carousel -->
+          <div id="hero-dots" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2"></div>
+        </div>
+      </section>
+
+      <!-- SECTION: NEW RELEASE & LATEST NEWS -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-[#84cc16] font-bold">/</span>
+            <h2 id="section-news-heading" class="font-display text-lg font-bold uppercase tracking-wide">
+              New Release & Latest News
+            </h2>
+          </div>
+          <button onclick="handleViewMore('New Release & Latest News')" class="text-xs font-semibold uppercase tracking-wider text-[#84cc16] hover:underline flex items-center gap-1 whitespace-nowrap">
+            <span>View All News</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- 3-Column Card Grid -->
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- Diisi otomatis via JavaScript -->
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- ATURAN IKLAN #2: BANNER_HORIZONTAL DI BAWAH NEW RELEASE   -->
+      <!-- ========================================================= -->
+      <section aria-label="Banner Iklan Horizontal" class="rounded-xl border border-[#84cc16]/30 bg-gradient-to-r from-[#12141a] via-[#182218] to-[#12141a] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="space-y-1 text-center sm:text-left">
+          <div class="flex items-center justify-center sm:justify-start gap-2 text-[11px] text-[#84cc16] font-mono uppercase">
+            <span>Sponsored Partner</span>
+            <span>·</span>
+            <span>Banner Horizontal</span>
+          </div>
+          <h3 class="text-sm sm:text-base font-bold text-white">
+            Streaming Film Box Office & Game Trailer 4K Tanpa Buffering — Server Asia Cepat
+          </h3>
+          <p class="text-xs text-slate-400">
+            Klik tombol banner promosi di samping untuk membuka halaman mitra resmi di tab baru.
+          </p>
+        </div>
+        <a
+          id="banner-horizontal-link"
+          href="https://asiafilm.org/4/21ec8c6df0f68fdc0e4861f994bc22de"
+          target="_blank"
+          rel="noopener noreferrer"
+          onclick="showToast('Membuka Banner Horizontal Sponsor...')"
+          class="px-5 py-2.5 rounded bg-[#84cc16] hover:bg-[#65a30d] text-black font-bold text-xs uppercase tracking-wider whitespace-nowrap transition-colors flex items-center gap-2 shrink-0"
+        >
+          <span>Buka Promo Eksklusif</span>
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </a>
+      </section>
+
+      <!-- SECTION: FEATURED GAMES & MOVIES -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-[#84cc16] font-bold">/</span>
+            <h2 id="section-catalog-heading" class="font-display text-lg font-bold uppercase tracking-wide">
+              Featured Games
+            </h2>
+          </div>
+          <button onclick="handleViewMore('Featured Games')" class="text-xs font-semibold uppercase tracking-wider text-[#84cc16] hover:underline flex items-center gap-1 whitespace-nowrap">
+            <span>View All Games</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- 6-Column Poster Grid -->
+        <div id="featured-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
+          <!-- Diisi otomatis via JavaScript -->
+        </div>
+      </section>
+
+      <!-- SECTION: UPCOMING RELEASES -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-[#84cc16] font-bold">/</span>
+            <h2 class="font-display text-lg font-bold uppercase tracking-wide">
+              Upcoming Releases
+            </h2>
+          </div>
+          <button onclick="handleViewMore('Upcoming Releases Calendar')" class="text-xs font-semibold uppercase tracking-wider text-[#84cc16] hover:underline flex items-center gap-1 whitespace-nowrap">
+            <span>View Calendar</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <div id="upcoming-list" class="rounded-xl border border-white/10 bg-[#12141a] divide-y divide-white/10">
+          <!-- Diisi otomatis via JavaScript -->
+        </div>
+      </section>
+
+      <!-- STATISTIK KOMUNITAS BAWAH (Sesuai Referensi Gambar) -->
+      <section class="pt-4 border-t border-white/10 grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="flex items-center gap-3.5">
+          <i data-lucide="users" class="w-7 h-7 text-[#84cc16] shrink-0"></i>
+          <div>
+            <div class="text-lg font-bold font-mono tabular-nums">2M+</div>
+            <div class="text-[11px] uppercase tracking-wider text-slate-400">Registered Players</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3.5">
+          <i data-lucide="gamepad-2" class="w-7 h-7 text-[#84cc16] shrink-0"></i>
+          <div>
+            <div class="text-lg font-bold font-mono tabular-nums">1500+</div>
+            <div class="text-[11px] uppercase tracking-wider text-slate-400">Games Available</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3.5">
+          <i data-lucide="trophy" class="w-7 h-7 text-[#84cc16] shrink-0"></i>
+          <div>
+            <div class="text-lg font-bold font-mono tabular-nums">25+</div>
+            <div class="text-[11px] uppercase tracking-wider text-slate-400">Esports Tournaments</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3.5">
+          <i data-lucide="message-square" class="w-7 h-7 text-[#84cc16] shrink-0"></i>
+          <div>
+            <div class="text-lg font-bold font-mono tabular-nums">100K+</div>
+            <div class="text-[11px] uppercase tracking-wider text-slate-400">Active Community</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 2C. SIDEBAR KANAN (Popular Movies, BANNER_KOTAK, Favorites) -->
+    <aside class="hidden xl:flex w-80 shrink-0 border-l border-white/10 p-5 flex-col gap-6">
+      <!-- Popular Movies Section -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-display text-sm font-bold uppercase tracking-wider">Popular Movies</h3>
+          <button onclick="handleViewMore('Popular Movies')" class="text-[11px] text-[#84cc16] hover:underline">View More</button>
+        </div>
+        <div id="popular-sidebar-list" class="space-y-3">
+          <!-- Diisi otomatis via JavaScript -->
+        </div>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- ATURAN IKLAN #3: BANNER_KOTAK ANTARA POPULAR & FAVORITES  -->
+      <!-- ========================================================= -->
+      <div class="rounded-xl border border-[#84cc16]/40 bg-[#12141a] p-4 space-y-3">
+        <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+          <span>SPONSORED AD</span>
+          <span class="text-[#84cc16]">BANNER KOTAK</span>
+        </div>
+        <a
+          id="banner-kotak-link"
+          href="https://asiafilm.org/4/18917dd4afc399e60139f594ffa6871b"
+          target="_blank"
+          rel="noopener noreferrer"
+          onclick="showToast('Membuka Banner Kotak Sponsor...')"
+          class="block group space-y-3"
+        >
+          <div class="h-36 rounded-lg bg-gradient-to-br from-[#1a2e05] via-[#0f172a] to-[#0b0b0e] border border-white/10 flex flex-col items-center justify-center p-4 text-center group-hover:border-[#84cc16] transition-colors">
+            <i data-lucide="play-circle" class="w-9 h-9 text-[#84cc16] mb-2 group-hover:scale-110 transition-transform"></i>
+            <p class="text-xs font-bold text-white">AsiaFilm Premium Pass</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Streaming Tanpa Batas · Klik Untuk Akses</p>
+          </div>
+          <span class="w-full py-2 rounded bg-[#84cc16] group-hover:bg-[#65a30d] text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors">
+            <span>Buka Penawaran</span>
+            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+          </span>
+        </a>
+      </div>
+
+      <!-- Favorites Section -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-display text-sm font-bold uppercase tracking-wider">Favorites</h3>
+          <span id="favorites-count" class="text-xs font-mono text-[#84cc16] tabular-nums">3</span>
+        </div>
+        <div id="favorites-sidebar-list" class="space-y-3">
+          <!-- Diisi otomatis via JavaScript -->
+        </div>
+        <button
+          onclick="handleViewMore('Favorites')"
+          class="w-full py-2 rounded border border-white/10 hover:border-[#84cc16] text-xs font-semibold text-slate-300 hover:text-[#84cc16] transition-colors"
+        >
+          View More
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- BAGIAN 3: POPUP VIDEO PLAYER MODAL                        -->
+  <!-- ========================================================= -->
+  <div id="video-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+    <div class="relative w-full max-w-3xl rounded-xl border border-white/15 bg-[#12141a] overflow-hidden shadow-2xl">
+      <!-- Header Modal dengan Tombol Close 'X' -->
+      <div class="flex items-center justify-between px-5 py-3.5 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#84cc16]"></span>
+          <h3 id="modal-video-title" class="font-display text-sm sm:text-base font-bold text-white truncate">
+            Playing Official Stream
+          </h3>
+        </div>
+        <button onclick="closeVideoModal()" class="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-slate-300 hover:text-red-400 transition-colors" aria-label="Tutup Video Player">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Area Simulasi Video Player Interaktif -->
+      <div class="relative aspect-video bg-black flex flex-col justify-between overflow-hidden">
+        <img id="modal-video-backdrop" src="" alt="Video Frame" class="absolute inset-0 w-full h-full object-cover opacity-45" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent"></div>
+
+        <!-- Tombol Play/Pause Tengah -->
+        <div class="relative z-10 flex-1 flex flex-col items-center justify-center gap-3 p-6 text-center">
+          <button
+            id="modal-play-toggle"
+            onclick="toggleSimulatedPlayback()"
+            class="w-16 h-16 rounded-full bg-[#84cc16] hover:bg-[#65a30d] text-black flex items-center justify-center shadow-lg transition-transform hover:scale-105"
+          >
+            <i id="modal-play-icon" data-lucide="pause" class="w-7 h-7 fill-current"></i>
+          </button>
+          <p id="modal-playback-status" class="text-xs font-mono text-[#84cc16] uppercase tracking-wider">
+            STREAMING AKTIF · 4K 60FPS HDR
+          </p>
+          <p id="modal-video-subtitle" class="text-xs text-slate-300 max-w-md"></p>
+        </div>
+
+        <!-- Progress Bar & Tautan Direct Link Server Eksternal -->
+        <div class="relative z-10 px-5 py-3 bg-black/80 border-t border-white/10 space-y-2">
+          <div class="w-full h-1.5 bg-white/15 rounded-full overflow-hidden cursor-pointer" onclick="seekSimulatedVideo(event)">
+            <div id="modal-progress-bar" class="h-full bg-[#84cc16] w-1/3 transition-all duration-300"></div>
+          </div>
+          <div class="flex items-center justify-between text-xs text-slate-300 font-mono tabular-nums">
+            <div class="flex items-center gap-3">
+              <span id="modal-time-code">01:14 / 03:45</span>
+              <span>·</span>
+              <span class="text-[#84cc16]">Direct CDN</span>
+            </div>
+            <a
+              href="https://asiafilm.org/4/6d59cce60ce7acf6d262639b11025301"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-3 py-1 rounded bg-[#84cc16] text-black font-sans font-bold text-[11px] uppercase tracking-wider hover:bg-[#65a30d] transition-colors flex items-center gap-1"
+            >
+              <span>Buka Server Full HD</span>
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WADAH TOAST NOTIFICATION -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ========================================================= -->
+  <!-- BAGIAN 4: VANILLA JAVASCRIPT (100% WORKING INTERACTIVITY) -->
+  <!-- ========================================================= -->
+  <script>
+    // ---------------------------------------------------------
+    // A. KONFIGURASI VARIABEL IKLAN & MONETISASI (WAJIB)
+    // ---------------------------------------------------------
+    const DIRECT_LINK = "https://asiafilm.org/4/6d59cce60ce7acf6d262639b11025301";
+    const BANNER_KOTAK = "https://asiafilm.org/4/18917dd4afc399e60139f594ffa6871b";
+    const BANNER_HORIZONTAL = "https://asiafilm.org/4/21ec8c6df0f68fdc0e4861f994bc22de";
+
+    let openDirectLinkOnWatch = true;
+    let isDarkMode = true;
+    let activeCategory = "Home";
+    let currentHeroIndex = 0;
+    let isVideoPlaying = true;
+
+    // ---------------------------------------------------------
+    // B. DATA MENU SIDEBAR (8 Halaman Dinamis)
+    // ---------------------------------------------------------
+    const SIDEBAR_MENUS = [
+      { id: "Home", label: "Home", icon: "home" },
+      { id: "Watch List", label: "Watch List", icon: "bookmark" },
+      { id: "Coming Soon", label: "Coming Soon", icon: "calendar" },
+      { id: "Discovery", label: "Discovery", icon: "compass" },
+      { id: "Friends", label: "Friends", icon: "users" },
+      { id: "Parties", label: "Parties", icon: "tv" },
+      { id: "Media", label: "Media", icon: "film" },
+      { id: "Setting", label: "Setting", icon: "settings" }
+    ];
+
+    // ---------------------------------------------------------
+    // C. DATA SLIDE HERO UTAMA
+    // ---------------------------------------------------------
+    const HERO_SLIDES = [
+      {
+        kicker: "ELDEN RING",
+        title: "SHADOW OF THE ERDTREE",
+        meta: "4K HDR · 9.8 SCORE",
+        desc: "The adventure continues in the Lands Between. Explore new realms, face deadly foes, and uncover the mysteries of the Erdtree.",
+        image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1400&q=80"
+      },
+      {
+        kicker: "BLACK MYTH",
+        title: "WUKONG: DESTINED ONE",
+        meta: "IMAX EDITION · 9.6 SCORE",
+        desc: "Berangkatlah sebagai Destined One dalam kisah epik mitologi timur penuh pertarungan sinematik dan visual generasi terbaru.",
+        image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1400&q=80"
+      },
+      {
+        kicker: "STARFIELD",
+        title: "SHATTERED SPACE EXPANSION",
+        meta: "DOLBY ATMOS · 9.1 SCORE",
+        desc: "Temukan stasiun luar angkasa misterius dan faksi tersembunyi di sudut terjauh galaksi dalam ekspansi cerita terbaru.",
+        image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1400&q=80"
+      }
+    ];
+
+    // ---------------------------------------------------------
+    // D. DATA KATALOG FILM & GAME
+    // ---------------------------------------------------------
+    const MEDIA_ITEMS = [
+      {
+        id: 1,
+        title: "Starfield: Shattered Space Announced",
+        category: "Discovery",
+        tag: "Sci-Fi RPG",
+        score: "8.9",
+        timeAgo: "2 HOURS AGO",
+        releaseDate: "JUN 07",
+        platforms: "PC / PS5 / XBOX SERIES X|S",
+        image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80",
+        inWatchlist: true
+      },
+      {
+        id: 2,
+        title: "Black Myth: Wukong Sells 10 Million Copies",
+        category: "Discovery",
+        tag: "Action RPG",
+        score: "9.6",
+        timeAgo: "5 HOURS AGO",
+        releaseDate: "JUN 14",
+        platforms: "PC / PS5",
+        image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=600&q=80",
+        inWatchlist: true
+      },
+      {
+        id: 3,
+        title: "Tomb Raider Remastered Trilogy Out Now",
+        category: "Media",
+        tag: "Action Adventure",
+        score: "9.0",
+        timeAgo: "1 DAY AGO",
+        releaseDate: "JUN 21",
+        platforms: "PC / PS5 / SWITCH",
+        image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80",
+        inWatchlist: false
+      },
+      {
+        id: 4,
+        title: "Elden Ring: Shadow of the Erdtree",
+        category: "Home",
+        tag: "Dark Fantasy",
+        score: "9.8",
+        timeAgo: "3 HOURS AGO",
+        releaseDate: "JUN 21",
+        platforms: "PC / PS5 / XBOX SERIES X|S",
+        image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80",
+        inWatchlist: true
+      },
+      {
+        id: 5,
+        title: "Call of Duty: Black Ops 6",
+        category: "Parties",
+        tag: "Tactical FPS",
+        score: "8.7",
+        timeAgo: "4 HOURS AGO",
+        releaseDate: "JUN 07",
+        platforms: "PC / PS5 / XBOX SERIES X|S",
+        image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=600&q=80",
+        inWatchlist: false
+      },
+      {
+        id: 6,
+        title: "HELLDIVERS 2 — Escalation of Freedom",
+        category: "Friends",
+        tag: "Co-op Squad",
+        score: "9.1",
+        timeAgo: "6 HOURS AGO",
+        releaseDate: "JUN 14",
+        platforms: "PC / PS5",
+        image: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=600&q=80",
+        inWatchlist: false
+      },
+      {
+        id: 7,
+        title: "Horizon Forbidden West",
+        category: "Coming Soon",
+        tag: "Open World",
+        score: "8.9",
+        timeAgo: "1 DAY AGO",
+        releaseDate: "JUN 21",
+        platforms: "PC / PS5",
+        image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80",
+        inWatchlist: false
+      },
+      {
+        id: 8,
+        title: "Marvel's Spider-Man 2",
+        category: "Watch List",
+        tag: "Superhero Action",
+        score: "9.0",
+        timeAgo: "2 DAYS AGO",
+        releaseDate: "JUN 28",
+        platforms: "PS5 / PC",
+        image: "https://images.unsplash.com/photo-1608889175123-8ee362201f81?auto=format&fit=crop&w=600&q=80",
+        inWatchlist: true
+      },
+      {
+        id: 9,
+        title: "Resident Evil 4",
+        category: "Media",
+        tag: "Survival Horror",
+        score: "8.8",
+        timeAgo: "3 DAYS AGO",
+        releaseDate: "JUL 02",
+        platforms: "PC / PS5 / XBOX SERIES X|S",
+        image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80",
+        inWatchlist: false
+      }
+    ];
+
+    // ---------------------------------------------------------
+    // E. FUNGSI RENDER MENU SIDEBAR & STATE HALAMAN
+    // ---------------------------------------------------------
+    function renderSidebarNav() {
+      const navEl = document.getElementById("sidebar-nav");
+      navEl.innerHTML = SIDEBAR_MENUS.map(menu => {
+        const isActive = menu.id === activeCategory;
+        return `
+          <button
+            onclick="switchCategory('${menu.id}')"
+            class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+              isActive
+                ? 'bg-[#84cc16] text-black font-bold'
+                : 'text-slate-400 hover:bg-white/5 hover:text-white'
+            }"
+          >
+            <span class="flex items-center gap-3">
+              <i data-lucide="${menu.icon}" class="w-4 h-4"></i>
+              <span>${menu.label}</span>
+            </span>
+            ${menu.id === 'Watch List' ? `<span class="font-mono text-[11px] tabular-nums">${MEDIA_ITEMS.filter(i => i.inWatchlist).length}</span>` : ''}
+          </button>
+        `;
+      }).join("");
+      lucide.createIcons();
+    }
+
+    function switchCategory(categoryName) {
+      activeCategory = categoryName;
+      document.getElementById("active-category-breadcrumb").textContent = categoryName;
+
+      const descriptions = {
+        "Home": "Sorotan Utama & Streaming Trailer",
+        "Watch List": "Daftar Tontonan & Koleksi Tersimpan Anda",
+        "Coming Soon": "Jadwal Rilis Film & Game Mendatang",
+        "Discovery": "Eksplorasi Berita Terkini & Tren Global",
+        "Friends": "Aktivitas Komunitas & Squad Co-op",
+        "Parties": "Turnamen Esports & Watch Party Live",
+        "Media": "Katalog Lengkap Ultra HD 4K",
+        "Setting": "Pengaturan Preferensi Streaming & Akun"
+      };
+      document.getElementById("active-category-title").textContent = descriptions[categoryName] || categoryName;
+      document.getElementById("section-news-heading").textContent = categoryName === "Home" ? "New Release & Latest News" : `${categoryName} — Sorotan Terkini`;
+      document.getElementById("section-catalog-heading").textContent = categoryName === "Home" ? "Featured Games" : `Katalog ${categoryName}`;
+
+      document.querySelectorAll(".top-nav-link").forEach(btn => {
+        if (btn.getAttribute("data-top-nav") === categoryName) {
+          btn.className = "top-nav-link text-[#84cc16] border-b-2 border-[#84cc16] py-5 transition-colors whitespace-nowrap";
+        } else {
+          btn.className = "top-nav-link text-slate-400 hover:text-white py-5 transition-colors whitespace-nowrap";
+        }
+      });
+
+      renderSidebarNav();
+      renderMainContent(document.getElementById("live-search-input").value);
+      showToast(`Menampilkan halaman: ${categoryName}`);
+    }
+
+    // ---------------------------------------------------------
+    // F. FUNGSI RENDER HERO CAROUSEL
+    // ---------------------------------------------------------
+    function renderHero() {
+      const slide = HERO_SLIDES[currentHeroIndex];
+      document.getElementById("hero-image").src = slide.image;
+      document.getElementById("hero-kicker").textContent = slide.kicker;
+      document.getElementById("hero-meta").textContent = slide.meta;
+      document.getElementById("hero-title").textContent = slide.title;
+      document.getElementById("hero-desc").textContent = slide.desc;
+
+      const dotsEl = document.getElementById("hero-dots");
+      dotsEl.innerHTML = HERO_SLIDES.map((_, idx) => `
+        <button
+          onclick="setHeroSlide(${idx})"
+          class="h-1.5 rounded-full transition-all ${idx === currentHeroIndex ? 'w-7 bg-[#84cc16]' : 'w-3 bg-white/30 hover:bg-white/60'}"
+          aria-label="Slide ${idx + 1}"
+        ></button>
+      `).join("");
+    }
+
+    function cycleHero(direction) {
+      currentHeroIndex = (currentHeroIndex + direction + HERO_SLIDES.length) % HERO_SLIDES.length;
+      renderHero();
+    }
+
+    function setHeroSlide(index) {
+      currentHeroIndex = index;
+      renderHero();
+    }
+
+    // ---------------------------------------------------------
+    // G. FUNGSI RENDER KONTEN UTAMA & SIDEBAR KANAN
+    // ---------------------------------------------------------
+    function renderMainContent(searchQuery = "") {
+      const q = searchQuery.trim().toLowerCase();
+
+      let filtered = MEDIA_ITEMS.filter(item => {
+        const matchesSearch = !q || item.title.toLowerCase().includes(q) || item.tag.toLowerCase().includes(q);
+        if (!matchesSearch) return false;
+        if (activeCategory === "Home" || activeCategory === "Setting") return true;
+        if (activeCategory === "Watch List") return item.inWatchlist;
+        return item.category === activeCategory || item.inWatchlist;
+      });
+
+      if (filtered.length === 0 && !q) {
+        filtered = MEDIA_ITEMS;
+      }
+
+      // 1. Render New Release / Latest News (3 Kolom)
+      const newsGrid = document.getElementById("news-grid");
+      const newsSlice = filtered.slice(0, 3);
+      if (newsSlice.length === 0) {
+        newsGrid.innerHTML = `
+          <div class="col-span-3 p-8 rounded-xl border border-white/10 text-center text-slate-400 text-sm">
+            Tidak ditemukan film/game dengan kata kunci "<strong>${searchQuery}</strong>".
+          </div>
+        `;
+      } else {
+        newsGrid.innerHTML = newsSlice.map(item => `
+          <article
+            onclick="handleCardClick(${item.id})"
+            class="group cursor-pointer rounded-xl border border-white/10 bg-[#12141a] overflow-hidden hover:border-[#84cc16]/60 transition-colors flex flex-col"
+          >
+            <div class="relative aspect-video overflow-hidden bg-black">
+              <img src="${item.image}" alt="${item.title}" referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute inset-0 bg-gradient-to-t from-[#12141a] via-transparent to-transparent"></div>
+              <button
+                onclick="event.stopPropagation(); handleCardClick(${item.id})"
+                class="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-[#84cc16] text-black flex items-center justify-center opacity-90 group-hover:scale-110 transition-transform"
+                aria-label="Play ${item.title}"
+              >
+                <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+              </button>
+            </div>
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+              <div class="space-y-1.5">
+                <div class="flex items-center gap-2 text-[11px] font-mono uppercase text-[#84cc16]">
+                  <span>NEWS</span>
+                  <span>·</span>
+                  <span class="text-slate-400">${item.tag}</span>
+                </div>
+                <h3 class="font-bold text-sm sm:text-base text-white group-hover:text-[#84cc16] transition-colors line-clamp-2">
+                  ${item.title}
+                </h3>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+                <span>${item.timeAgo}</span>
+                <span class="font-mono text-[#84cc16] tabular-nums">★ ${item.score}</span>
+              </div>
+            </div>
+          </article>
+        `).join("");
+      }
+
+      // 2. Render Featured Games (6 Kolom Poster)
+      const featuredGrid = document.getElementById("featured-grid");
+      featuredGrid.innerHTML = filtered.slice(0, 6).map(item => `
+        <div
+          onclick="handleCardClick(${item.id})"
+          class="group cursor-pointer rounded-xl border border-white/10 bg-[#12141a] overflow-hidden hover:border-[#84cc16]/60 transition-colors flex flex-col"
+        >
+          <div class="relative aspect-[3/4] overflow-hidden bg-black">
+            <img src="${item.image}" alt="${item.title}" referrerpolicy="no-referrer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent"></div>
+            <button
+              onclick="event.stopPropagation(); toggleWatchlist(${item.id})"
+              class="absolute top-2.5 right-2.5 w-7 h-7 rounded bg-black/70 hover:bg-[#84cc16] hover:text-black text-white border border-white/15 flex items-center justify-center transition-colors"
+              title="Add to Watch List"
+            >
+              <i data-lucide="${item.inWatchlist ? 'check' : 'plus'}" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <div class="p-3 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <h4 class="text-xs font-semibold text-white group-hover:text-[#84cc16] truncate transition-colors">${item.title}</h4>
+              <p class="text-[11px] text-slate-400 truncate">${item.tag}</p>
+            </div>
+            <span class="font-mono text-xs font-bold text-[#84cc16] tabular-nums shrink-0">${item.score}</span>
+          </div>
+        </div>
+      `).join("");
+
+      // 3. Render Upcoming Releases List
+      const upcomingList = document.getElementById("upcoming-list");
+      upcomingList.innerHTML = filtered.slice(0, 3).map(item => {
+        const [month, day] = item.releaseDate.split(" ");
+        return `
+          <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.02] transition-colors">
+            <div class="flex items-center gap-4 min-w-0">
+              <div class="w-12 text-center shrink-0">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-[#84cc16]">${month}</div>
+                <div class="text-lg font-mono font-bold text-white tabular-nums">${day}</div>
+              </div>
+              <img
+                onclick="handleCardClick(${item.id})"
+                src="${item.image}"
+                alt="${item.title}"
+                referrerpolicy="no-referrer"
+                class="w-24 h-14 rounded object-cover cursor-pointer shrink-0 border border-white/10"
+              />
+              <div class="min-w-0">
+                <h4 onclick="handleCardClick(${item.id})" class="text-sm font-bold text-white hover:text-[#84cc16] cursor-pointer truncate transition-colors">
+                  ${item.title}
+                </h4>
+                <p class="text-xs text-slate-400 uppercase tracking-wider mt-0.5">${item.tag}</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between sm:justify-end gap-4">
+              <span class="text-xs font-mono text-slate-400">${item.platforms}</span>
+              <button
+                onclick="toggleWatchlist(${item.id})"
+                class="px-3.5 py-1.5 rounded border ${
+                  item.inWatchlist
+                    ? 'border-[#84cc16] bg-[#84cc16]/15 text-[#84cc16]'
+                    : 'border-white/15 hover:border-[#84cc16] text-slate-300'
+                } text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap transition-colors"
+              >
+                <i data-lucide="heart" class="w-3.5 h-3.5"></i>
+                <span>${item.inWatchlist ? 'Wishlisted' : 'Wishlist'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      renderRightSidebar();
+      lucide.createIcons();
+    }
+
+    function renderRightSidebar() {
+      const popularEl = document.getElementById("popular-sidebar-list");
+      popularEl.innerHTML = MEDIA_ITEMS.slice(0, 3).map(item => `
+        <div onclick="handleCardClick(${item.id})" class="group cursor-pointer flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+          <img src="${item.image}" alt="${item.title}" referrerpolicy="no-referrer" class="w-16 h-12 rounded object-cover shrink-0 border border-white/10" />
+          <div class="min-w-0 flex-1">
+            <h4 class="text-xs font-semibold text-white group-hover:text-[#84cc16] truncate transition-colors">${item.title}</h4>
+            <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
+              <span>${item.tag}</span>
+              <span>·</span>
+              <span class="font-mono text-[#84cc16] tabular-nums">★ ${item.score}</span>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      const favItems = MEDIA_ITEMS.filter(i => i.inWatchlist);
+      document.getElementById("favorites-count").textContent = favItems.length;
+      const favEl = document.getElementById("favorites-sidebar-list");
+      favEl.innerHTML = favItems.slice(0, 3).map(item => `
+        <div onclick="handleCardClick(${item.id})" class="group cursor-pointer flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+          <img src="${item.image}" alt="${item.title}" referrerpolicy="no-referrer" class="w-14 h-10 rounded object-cover shrink-0 border border-white/10" />
+          <div class="min-w-0 flex-1">
+            <h4 class="text-xs font-semibold text-white group-hover:text-[#84cc16] truncate transition-colors">${item.title}</h4>
+            <span class="text-[11px] text-slate-400">${item.platforms}</span>
+          </div>
+          <button onclick="event.stopPropagation(); handleCardClick(${item.id})" class="p-1.5 rounded bg-[#84cc16]/15 text-[#84cc16] hover:bg-[#84cc16] hover:text-black transition-colors">
+            <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+          </button>
+        </div>
+      `).join("");
+    }
+
+    // ---------------------------------------------------------
+    // H. ATURAN IKLAN #1 & LOGIKA VIDEO PLAYER MODAL
+    // ---------------------------------------------------------
+    function openAdDirectLink(sourceLabel) {
+      window.open(DIRECT_LINK, "_blank", "noopener,noreferrer");
+      showToast(`Membuka DIRECT_LINK (${sourceLabel})`);
+    }
+
+    function handleWatchAction(slideIdx, mode) {
+      const slide = HERO_SLIDES[slideIdx];
+      if (openDirectLinkOnWatch) {
+        window.open(DIRECT_LINK, "_blank", "noopener,noreferrer");
+      }
+      openVideoModal(slide.title, slide.desc, slide.image);
+    }
+
+    function handleCardClick(itemId) {
+      const item = MEDIA_ITEMS.find(i => i.id === itemId) || MEDIA_ITEMS[0];
+      if (openDirectLinkOnWatch) {
+        window.open(DIRECT_LINK, "_blank", "noopener,noreferrer");
+      }
+      openVideoModal(item.title, `Kategori: ${item.tag} · Platform: ${item.platforms} · Skor: ${item.score}`, item.image);
+    }
+
+    function openVideoModal(title, subtitle, backdropUrl) {
+      const modal = document.getElementById("video-modal");
+      document.getElementById("modal-video-title").textContent = title;
+      document.getElementById("modal-video-subtitle").textContent = subtitle;
+      document.getElementById("modal-video-backdrop").src = backdropUrl;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      isVideoPlaying = true;
+      lucide.createIcons();
+    }
+
+    function closeVideoModal() {
+      const modal = document.getElementById("video-modal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function toggleSimulatedPlayback() {
+      isVideoPlaying = !isVideoPlaying;
+      const statusEl = document.getElementById("modal-playback-status");
+      const iconEl = document.getElementById("modal-play-icon");
+      statusEl.textContent = isVideoPlaying ? "STREAMING AKTIF · 4K 60FPS HDR" : "STREAM DIJEDA (PAUSED)";
+      iconEl.setAttribute("data-lucide", isVideoPlaying ? "pause" : "play");
+      lucide.createIcons();
+    }
+
+    function seekSimulatedVideo(e) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const pct = Math.max(5, Math.min(98, Math.round(((e.clientX - rect.left) / rect.width) * 100)));
+      document.getElementById("modal-progress-bar").style.width = pct + "%";
+      showToast(`Melompat ke durasi video ${pct}%`);
+    }
+
+    function toggleDirectAdSetting(checked) {
+      openDirectLinkOnWatch = checked;
+      showToast(checked ? "Direct Link aktif saat klik Watch/Poster." : "Mode hanya popup Video Player aktif.");
+    }
+
+    // ---------------------------------------------------------
+    // I. LIVE SEARCH FILTER & NIGHT/LIGHT MODE TOGGLE
+    // ---------------------------------------------------------
+    function handleLiveSearch(value) {
+      renderMainContent(value);
+    }
+
+    function toggleThemeMode() {
+      isDarkMode = !isDarkMode;
+      const body = document.body;
+      const navbar = document.getElementById("top-navbar");
+      const label = document.getElementById("theme-label");
+      const icon = document.getElementById("theme-icon");
+
+      if (isDarkMode) {
+        document.documentElement.classList.add("dark");
+        body.style.backgroundColor = "#0b0b0e";
+        body.style.color = "#f1f5f9";
+        navbar.style.backgroundColor = "rgba(11, 11, 14, 0.95)";
+        label.textContent = "Night";
+        icon.setAttribute("data-lucide", "moon");
+        showToast("Tema diubah ke Night Mode (#0b0b0e)");
+      } else {
+        document.documentElement.classList.remove("dark");
+        body.style.backgroundColor = "#f8fafc";
+        body.style.color = "#0f172a";
+        navbar.style.backgroundColor = "rgba(248, 250, 252, 0.95)";
+        label.textContent = "Light";
+        icon.setAttribute("data-lucide", "sun");
+        showToast("Tema diubah ke Light Mode (#f8fafc)");
+      }
+      lucide.createIcons();
+    }
+
+    // ---------------------------------------------------------
+    // J. INTERAKSI TAMBAHAN (Watchlist +, Notifikasi, Toast)
+    // ---------------------------------------------------------
+    function toggleWatchlist(itemId) {
+      const item = MEDIA_ITEMS.find(i => i.id === itemId);
+      if (!item) return;
+      item.inWatchlist = !item.inWatchlist;
+      renderSidebarNav();
+      renderMainContent(document.getElementById("live-search-input").value);
+      showToast(item.inWatchlist ? `"${item.title}" ditambahkan ke Watch List!` : `"${item.title}" dihapus dari Watch List.`);
+    }
+
+    function addToWatchlistFromHero() {
+      const slide = HERO_SLIDES[currentHeroIndex];
+      showToast(`"${slide.kicker}: ${slide.title}" berhasil ditambahkan ke Watch List!`);
+    }
+
+    function handleNotificationClick() {
+      const badge = document.getElementById("notif-badge");
+      badge.textContent = "0";
+      showToast("3 Notifikasi baru: Trailer Elden Ring & Turnamen Esports dimulai malam ini!");
+    }
+
+    function handleViewMore(sectionName) {
+      showToast(`Memuat lebih banyak item untuk kategori: ${sectionName}...`);
+    }
+
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById("left-sidebar");
+      sidebar.classList.toggle("-translate-x-full");
+    }
+
+    function showToast(message) {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = "px-4 py-2.5 rounded-lg border border-[#84cc16]/50 bg-[#12141a] text-white text-xs font-medium shadow-xl flex items-center gap-2 pointer-events-auto transition-all duration-200";
+      toast.innerHTML = `<span class="w-2 h-2 rounded-full bg-[#84cc16]"></span><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 200);
+      }, 2800);
+    }
+
+    // ---------------------------------------------------------
+    // K. INISIALISASI AWAL SAAT DOM SELESAI DIMUAT
+    // ---------------------------------------------------------
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("banner-horizontal-link").href = BANNER_HORIZONTAL;
+      document.getElementById("banner-kotak-link").href = BANNER_KOTAK;
+      renderSidebarNav();
+      renderHero();
+      renderMainContent();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
